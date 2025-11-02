@@ -1,0 +1,353 @@
+local player = game.Players.LocalPlayer
+
+-- ScreenGui
+local gui = Instance.new("ScreenGui")
+gui.Name = "ExecutePanel"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- Main Frame
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 600, 0, 400)
+frame.Position = UDim2.new(0.5, -300, 0.5, -200)
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+frame.Parent = gui
+
+-- Dragging
+local dragging, dragInput, dragStart, startPos
+local function updateDrag(input)
+	local delta = input.Position - dragStart
+	frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+		startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+frame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = frame.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+				dragInput = nil
+			end
+		end)
+	end
+end)
+frame.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+		dragInput = input
+	end
+end)
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		updateDrag(input)
+	end
+end)
+
+-- Title bar
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 40)
+title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Text = "Sky made by mohmaad_18 in TikTok"
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 20
+title.Parent = frame
+
+-- Minimize/Maximize
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Size = UDim2.new(0, 30, 0, 30)
+toggleBtn.Position = UDim2.new(1, -35, 0, 5)
+toggleBtn.AnchorPoint = Vector2.new(0, 0)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 0)
+toggleBtn.Text = "🔼"
+toggleBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+toggleBtn.Font = Enum.Font.SourceSansBold
+toggleBtn.TextSize = 20
+toggleBtn.Parent = frame
+
+-- TextBox
+local box = Instance.new("TextBox")
+box.Size = UDim2.new(1, -20, 0.5, -25)
+box.Position = UDim2.new(0, 10, 0, 50)
+box.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+box.TextColor3 = Color3.fromRGB(255, 255, 255)
+box.Font = Enum.Font.Code
+box.TextSize = 14
+box.Text = "-- Paste your Lua code here"
+box.TextXAlignment = Enum.TextXAlignment.Left
+box.TextYAlignment = Enum.TextYAlignment.Top
+box.MultiLine = true
+box.ClearTextOnFocus = false
+box.Parent = frame
+
+-- Output Frame
+local outputFrame = Instance.new("ScrollingFrame")
+outputFrame.Size = UDim2.new(1, -20, 0.45, -60)
+outputFrame.Position = UDim2.new(0, 10, 0.5, 25)
+outputFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+outputFrame.BorderSizePixel = 0
+outputFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+outputFrame.ScrollBarThickness = 6
+outputFrame.Parent = frame
+
+local outputLabel = Instance.new("TextLabel")
+outputLabel.Size = UDim2.new(1, 0, 0, 0)
+outputLabel.Position = UDim2.new(0, 0, 0, 0)
+outputLabel.BackgroundTransparency = 1
+outputLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+outputLabel.Font = Enum.Font.Code
+outputLabel.TextSize = 14
+outputLabel.TextXAlignment = Enum.TextXAlignment.Left
+outputLabel.TextYAlignment = Enum.TextYAlignment.Top
+outputLabel.Text = ""
+outputLabel.Parent = outputFrame
+
+-- Append output
+local function appendOutput(text)
+	outputLabel.Text = outputLabel.Text .. text .. "\n"
+	outputLabel.Size = UDim2.new(1, 0, 0, outputLabel.TextBounds.Y)
+	outputFrame.CanvasSize = UDim2.new(0, 0, 0, outputLabel.TextBounds.Y)
+	outputFrame.CanvasPosition = Vector2.new(0, outputLabel.TextBounds.Y)
+end
+
+-- Loader
+local loader = loadstring or load
+
+-- Buttons layout
+local buttonWidth = 0.18
+local buttonHeight = 40
+local spacing = 0.02
+
+-- Fly Button
+local flyBtn = Instance.new("TextButton")
+flyBtn.Size = UDim2.new(buttonWidth, 0, 0, buttonHeight)
+flyBtn.Position = UDim2.new(0.02, 0, 1, -50)
+flyBtn.BackgroundColor3 = Color3.fromRGB(100, 170, 255)
+flyBtn.Text = "FLY"
+flyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+flyBtn.Font = Enum.Font.SourceSansBold
+flyBtn.TextSize = 18
+flyBtn.Parent = frame
+
+local flyScript = [[
+loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-gui-v3-30439"))()
+]]
+
+flyBtn.MouseButton1Click:Connect(function()
+	box.Text = flyScript
+	appendOutput("🪂 Fly script inserted into TextBox.")
+end)
+
+-- EXE Button
+local exeBtn = Instance.new("TextButton")
+exeBtn.Size = UDim2.new(buttonWidth, 0, 0, buttonHeight)
+exeBtn.Position = UDim2.new(0.22, 0, 1, -50)
+exeBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+exeBtn.Text = "EXE"
+exeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+exeBtn.Font = Enum.Font.SourceSansBold
+exeBtn.TextSize = 18
+exeBtn.Parent = frame
+
+-- Clear Button
+local clearBtn = Instance.new("TextButton")
+clearBtn.Size = UDim2.new(buttonWidth, 0, 0, buttonHeight)
+clearBtn.Position = UDim2.new(0.42, 0, 1, -50)
+clearBtn.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+clearBtn.Text = "CLEAR"
+clearBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+clearBtn.Font = Enum.Font.SourceSansBold
+clearBtn.TextSize = 18
+clearBtn.Parent = frame
+
+-- ESP Button
+local espBtn = Instance.new("TextButton")
+espBtn.Size = UDim2.new(buttonWidth, 0, 0, buttonHeight)
+espBtn.Position = UDim2.new(0.62, 0, 1, -50)
+espBtn.BackgroundColor3 = Color3.fromRGB(120, 255, 120)
+espBtn.Text = "ESP"
+espBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+espBtn.Font = Enum.Font.SourceSansBold
+espBtn.TextSize = 18
+espBtn.Parent = frame
+
+-- Infinite Yield Button (new)
+local iyBtn = Instance.new("TextButton")
+iyBtn.Size = UDim2.new(buttonWidth, 0, 0, buttonHeight)
+iyBtn.Position = UDim2.new(0.82, 0, 1, -50)
+iyBtn.BackgroundColor3 = Color3.fromRGB(200, 160, 255)
+iyBtn.Text = "Infinite Yield"
+iyBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+iyBtn.Font = Enum.Font.SourceSansBold
+iyBtn.TextSize = 16
+iyBtn.Parent = frame
+
+-- Save original sizes/positions
+local originalSize = frame.Size
+local originalButtonSizes = {
+	Fly = flyBtn.Size,
+	EXE = exeBtn.Size,
+	CLEAR = clearBtn.Size,
+	ESP = espBtn.Size,
+	IY = iyBtn.Size
+}
+local originalButtonPositions = {
+	Fly = flyBtn.Position,
+	EXE = exeBtn.Position,
+	CLEAR = clearBtn.Position,
+	ESP = espBtn.Position,
+	IY = iyBtn.Position
+}
+
+local minimized = false
+
+-- Toggle behavior
+toggleBtn.MouseButton1Click:Connect(function()
+	if not minimized then
+		frame.Size = UDim2.new(0, 200, 0, 100)
+
+		-- arrange buttons inside minimized panel (5 buttons)
+		local minBtnSize = UDim2.new(0.18,0,0,25)
+		flyBtn.Size = minBtnSize
+		exeBtn.Size = minBtnSize
+		clearBtn.Size = minBtnSize
+		espBtn.Size = minBtnSize
+		iyBtn.Size = minBtnSize
+
+		flyBtn.Position = UDim2.new(0.02, 0, 1, -35)
+		exeBtn.Position = UDim2.new(0.22, 0, 1, -35)
+		clearBtn.Position = UDim2.new(0.42, 0, 1, -35)
+		espBtn.Position = UDim2.new(0.62, 0, 1, -35)
+		iyBtn.Position  = UDim2.new(0.82, 0, 1, -35)
+
+		box.Visible = false
+		outputFrame.Visible = false
+		toggleBtn.Text = "🔽"
+		minimized = true
+	else
+		frame.Size = originalSize
+		flyBtn.Size = originalButtonSizes.Fly
+		exeBtn.Size = originalButtonSizes.EXE
+		clearBtn.Size = originalButtonSizes.CLEAR
+		espBtn.Size = originalButtonSizes.ESP
+		iyBtn.Size  = originalButtonSizes.IY
+
+		flyBtn.Position = originalButtonPositions.Fly
+		exeBtn.Position = originalButtonPositions.EXE
+		clearBtn.Position = originalButtonPositions.CLEAR
+		espBtn.Position = originalButtonPositions.ESP
+		iyBtn.Position  = originalButtonPositions.IY
+
+		box.Visible = true
+		outputFrame.Visible = true
+		toggleBtn.Text = "🔼"
+		minimized = false
+	end
+end)
+
+-- Execute Button
+exeBtn.MouseButton1Click:Connect(function()
+	local code = box.Text
+	if code == "" then
+		appendOutput("⚠️ No code to execute.")
+		return
+	end
+	if not loader then
+		appendOutput("❌ loadstring() is not supported here.")
+		return
+	end
+	local fn, err = loader(code)
+	if not fn then
+		appendOutput("❌ Load error: "..tostring(err))
+		return
+	end
+	local oldPrint = print
+	print = function(...)
+		local args = {...}
+		local str = ""
+		for i,v in ipairs(args) do str=str..tostring(v).."\t" end
+		appendOutput(str)
+	end
+	local ok,res = pcall(fn)
+	print = oldPrint
+	if ok then
+		appendOutput("✅ Code executed successfully.")
+	else
+		appendOutput("❌ Runtime error: "..tostring(res))
+	end
+end)
+
+-- Clear Button
+clearBtn.MouseButton1Click:Connect(function()
+	box.Text = ""
+	outputLabel.Text = ""
+	outputLabel.Size = UDim2.new(1,0,0,0)
+	outputFrame.CanvasSize = UDim2.new(0,0,0,0)
+end)
+
+-- ESP Script
+local espScript = [[
+local Players = game:GetService("Players")
+local localPlayer = Players.LocalPlayer
+local function addESP(plr)
+	if plr==localPlayer then return end
+	if not plr.Character then return end
+	-- Highlight
+	if not plr.Character:FindFirstChild("ESP_Highlight") then
+		local highlight = Instance.new("Highlight")
+		highlight.Name="ESP_Highlight"
+		highlight.Adornee=plr.Character
+		highlight.FillColor=Color3.fromRGB(255,0,0)
+		highlight.FillTransparency=0.6
+		highlight.OutlineColor=Color3.fromRGB(0,0,0)
+		highlight.OutlineTransparency=0.5
+		highlight.Parent=plr.Character
+	end
+	-- Name Billboard
+	if plr.Character:FindFirstChild("Head") and not plr.Character:FindFirstChild("ESP_NameBillboard") then
+		local billboard = Instance.new("BillboardGui")
+		billboard.Name="ESP_NameBillboard"
+		billboard.Adornee=plr.Character.Head
+		billboard.Size=UDim2.new(0,120,0,40)
+		billboard.StudsOffset=Vector3.new(0,2,0)
+		billboard.AlwaysOnTop=true
+		local text = Instance.new("TextLabel")
+		text.Size=UDim2.new(1,0,1,0)
+		text.BackgroundTransparency=1
+		text.TextColor3=Color3.fromRGB(255,255,255)
+		text.TextStrokeTransparency=0
+		text.Text=plr.Name
+		text.Font=Enum.Font.SourceSansBold
+		text.TextScaled=true
+		text.Parent=billboard
+		billboard.Parent=plr.Character
+	end
+end
+for _,plr in pairs(Players:GetPlayers()) do addESP(plr) end
+Players.PlayerAdded:Connect(function(plr)
+	plr.CharacterAdded:Connect(function() addESP(plr) end)
+end)
+]]
+
+-- ESP Button behavior
+espBtn.MouseButton1Click:Connect(function()
+	box.Text = espScript
+	appendOutput("👁️ ESP script inserted into TextBox.")
+end)
+
+-- Infinite Yield script (the one you gave)
+local iyScript = [[
+loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-infinite-yield-39585"))()
+]]
+
+-- Infinite Yield Button behavior: insert script into TextBox
+iyBtn.MouseButton1Click:Connect(function()
+	box.Text = iyScript
+	appendOutput("⚡ Infinite Yield script inserted into TextBox.")
+end)
